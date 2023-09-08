@@ -16,6 +16,12 @@
   box-sizing: border-box;
   animation: rotation 1s linear infinite;
 }
+.input::-webkit-input-placeholder {
+  -webkit-transition: 300ms;
+}
+.input:focus::-webkit-input-placeholder {
+  color: transparent;
+}
 
 @keyframes rotation {
   0% {

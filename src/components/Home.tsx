@@ -1,4 +1,4 @@
-import Button from "./Buttons/Button";
+import { PrimaryButton } from "./Buttons/Button";
 import MainIcon from "../assets/png/Falcon.png";
 import PlanetVehicleDetails from "../assets/png/PlanetVehicleDetails.png";
 import { Link } from "react-router-dom";
@@ -19,9 +19,9 @@ const Home = () => {
         these planets. You can see the planets and the vehicles below.
       </p>
       <img src={PlanetVehicleDetails} alt="vehicle-planet-details.jpg" />
-      <Button type="button" className="mt-4">
+      <PrimaryButton type="button" className="mt-4">
         <Link to="play">Start game</Link>
-      </Button>
+      </PrimaryButton>
     </div>
   );
 };

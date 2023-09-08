@@ -1,17 +1,57 @@
-import { useEffect, useRef, useState } from "react";
-import { usePlanets } from "../hooks/usePlanets";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { IAutocompleteProps } from "../interface/Autocomplete.interface";
+import { IoChevronDownOutline } from "react-icons/io5";
 
-const Autocomplete = ({ label }: IAutocompleteProps) => {
+const Autocomplete = ({
+  label,
+  name,
+  placeholder,
+  planets,
+}: IAutocompleteProps) => {
   const [input, setInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const { planets } = usePlanets();
   const [suggestions, setSuggestions] = useState<Planet[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
 
   const suggestionsOpenRef = useRef<boolean>(showSuggestions);
-
   suggestionsOpenRef.current = showSuggestions;
+
+  useEffect(() => {
+    if (listRef.current) {
+      const bottomDistance = listRef.current.getBoundingClientRect().bottom;
+      if (bottomDistance > document.documentElement.clientHeight) {
+        listRef.current.classList.add("top-auto", "bottom-[40px]");
+      }
+    }
+  }, [showSuggestions]);
+
+  const filterSuggestion = useCallback(
+    (value: string) => {
+      if (value === "") {
+        setSuggestions(planets!);
+        return;
+      }
+
+      const filteredSuggestions = planets?.filter((planet) =>
+        planet.name.toLowerCase().includes(value.toLowerCase())
+      ) as Planet[];
+      setSuggestions(filteredSuggestions);
+    },
+    [planets]
+  );
+
+  const expandMenu = useCallback(
+    (value: string) => {
+      setShowSuggestions(true);
+      filterSuggestion(value);
+    },
+    [filterSuggestion]
+  );
+
+  const closeMenu = useCallback(() => {
+    setShowSuggestions(false);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -19,52 +59,39 @@ const Autocomplete = ({ label }: IAutocompleteProps) => {
         containerRef.current &&
         !containerRef.current.contains(event.target as Node)
       ) {
-        setShowSuggestions(false);
+        closeMenu();
       }
     };
 
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+  }, [closeMenu]);
 
   useEffect(() => {
-    const pressedEscape = (e: KeyboardEvent) => {
+    const handleEscapeOrTab = (e: KeyboardEvent) => {
       if (
         suggestionsOpenRef.current &&
         (e.key === "Escape" || e.key === "Tab")
       ) {
-        setShowSuggestions(false);
+        closeMenu();
       }
     };
-    document.addEventListener("keydown", pressedEscape);
+    document.addEventListener("keydown", handleEscapeOrTab);
 
     return () => {
-      document.removeEventListener("keydown", pressedEscape);
+      document.removeEventListener("keydown", handleEscapeOrTab);
     };
-  }, []);
+  }, [closeMenu]);
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     setInput(value);
-
-    setShowSuggestions(true);
-    const filteredSuggestions = planets?.filter((planet) =>
-      planet.name.toLowerCase().includes(value.toLowerCase())
-    ) as Planet[];
-    setSuggestions(filteredSuggestions);
+    expandMenu(value);
   };
 
   const onInputFocus = (event: React.FocusEvent<HTMLInputElement>) => {
     const { value } = event.target;
-    if (value === "") setSuggestions(planets!);
-    else {
-      const filteredSuggestions = planets?.filter((planet) =>
-        planet.name.toLowerCase().includes(value.toLowerCase())
-      ) as Planet[];
-      setSuggestions(filteredSuggestions);
-    }
-
-    setShowSuggestions(true);
+    expandMenu(value);
   };
 
   const suggestionOnClick = (event: React.MouseEvent<HTMLLIElement>) => {
@@ -78,18 +105,31 @@ const Autocomplete = ({ label }: IAutocompleteProps) => {
       className="flex flex-col gap-3 w-[250px] sm:w-[350px] border-red-500 relative"
       ref={containerRef}
     >
-      <label className="text-gray-300 text-sm md:text-base font-medium">
+      <label className="text-gray-300 text-sm md:text-base font-semibold">
         {label}
       </label>
-      <input
-        className="text-slate-800 text-sm md:text-base px-3 bg-slate-200 py-1 sm:py-2 rounded-sm border-none outline-none focus:outline-red-300 outline-5 block"
-        type="text"
-        value={input}
-        onChange={onChange}
-        onFocus={onInputFocus}
-      />
+      <div className="relative">
+        <input
+          className="text-slate-800 font-medium w-full text-sm md:text-base px-3 bg-slate-200 py-1 sm:py-2 rounded-sm border-none outline-none focus:outline-red-300 outline-5 block input"
+          type="text"
+          name={name}
+          value={input}
+          onChange={onChange}
+          onFocus={onInputFocus}
+          placeholder={placeholder}
+        />
+        <span
+          className="absolute top-[6px] right-2 md:top-[13px]"
+          onClick={() => expandMenu(input)}
+        >
+          <IoChevronDownOutline className="w-4 h-4 text-slate-400" />
+        </span>
+      </div>
       {showSuggestions && (
-        <ul className="bg-zinc-300 absolute w-full top-[70px] sm:top-[85px] overflow-auto lg:top-[90px] z-10 text-slate-800 rounded-sm">
+        <ul
+          ref={listRef}
+          className="bg-zinc-300 absolute w-full top-[70px] sm:top-[85px] overflow-auto lg:top-[90px] z-10 text-slate-800 rounded-sm"
+        >
           {suggestions?.map((suggestion) => (
             <li
               key={suggestion.name}

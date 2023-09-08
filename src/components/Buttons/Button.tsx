@@ -1,4 +1,4 @@
-import { IButtonProps } from "../../interface/Button/Button.interface";
+import { IButtonProps } from "../../interface/Button.interface";
 
 const Button = ({ children, type, tabIndex, className }: IButtonProps) => {
   return (

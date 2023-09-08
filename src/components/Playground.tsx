@@ -16,8 +16,8 @@ const Playground = () => {
   }
 
   return (
-    <div className="container text-white">
-      <form className="flex flex-col lg:flex-row gap-8">
+    <div className="text-white my-10 mx-auto p-8">
+      <form className="mx-auto flex flex-col items-center lg:flex-row gap-8">
         <Autocomplete label="Destination 1" />
         <Autocomplete label="Destination 2" />
         <Autocomplete label="Destination 3" />

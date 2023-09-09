@@ -1,40 +1,30 @@
 import { useRef } from "react";
 import { usePlanets } from "../hooks/usePlanets";
 import { useVehicles } from "../hooks/useVehicles";
-import Autocomplete from "./Autocomplete";
-import { PrimaryButton, SecondaryButton } from "./Buttons/Button";
 import Loader from "./Loader/Loader";
+import MergedInput from "./MergedInput";
+import { useForm, FormProvider } from "react-hook-form";
+import { FormInputs, IndexType } from "../types";
 
-const destinationInputs = [
+const inputs = [
   {
-    id: 1,
-    label: "Destination 1",
-    name: "destination-one",
-    placeholder: "Enter planet no 1",
+    index: 1,
   },
   {
-    id: 2,
-    label: "Destination 2",
-    name: "destination-two",
-    placeholder: "Enter planet no 2",
+    index: 2,
   },
   {
-    id: 3,
-    label: "Destination 3",
-    name: "destination-three",
-    placeholder: "Enter planet no 3",
+    index: 3,
   },
   {
-    id: 4,
-    label: "Destination 4",
-    name: "destination-four",
-    placeholder: "Enter planet no 4",
+    index: 4,
   },
 ];
 
 const Playground = () => {
-  const { planets, isLoading: isPlanetsLoading } = usePlanets();
-  const { vehicles, isLoading: isVehiclesLoading } = useVehicles();
+  const { isLoading: isPlanetsLoading } = usePlanets();
+  const { isLoading: isVehiclesLoading } = useVehicles();
+  const methods = useForm<FormInputs>();
   const formRef = useRef<HTMLFormElement>(null);
 
   if (isPlanetsLoading && isVehiclesLoading) {
@@ -46,32 +36,15 @@ const Playground = () => {
   }
 
   return (
-    <div className="text-white my-10 mx-auto p-8">
-      <form
-        className="mx-auto flex flex-col lg:flex-row items-center gap-8"
-        ref={formRef}
-      >
-        {/* <div className="flex flex-col lg:flex-row gap-8 flex-wrap"> */}
-        {destinationInputs.map((input) => (
-          <Autocomplete
-            key={input.id}
-            label={input.label}
-            placeholder={input.placeholder}
-            name={input.name}
-            planets={planets!}
-          />
-        ))}
-        {/* </div> */}
-        {/* <div className="flex flex-row gap-4">
-          <SecondaryButton
-            type="reset"
-            className="px-6"
-            onClick={() => resetFormValues()}
-          >
-            Reset
-          </SecondaryButton>
-          <PrimaryButton type="submit">Submit</PrimaryButton>
-        </div> */}
+    <div className="text-white my-10 p-8">
+      <form ref={formRef}>
+        <FormProvider {...methods}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {inputs.map((input) => (
+              <MergedInput index={input.index as IndexType} key={input.index} />
+            ))}
+          </div>
+        </FormProvider>
       </form>
     </div>
   );

@@ -6,6 +6,9 @@
   font-family: "Manrope", sans-serif;
 }
 
+.input {
+  @apply text-slate-800 font-medium px-3 text-sm md:text-base bg-slate-200 py-1 sm:py-2 rounded-sm border-none;
+}
 .loader {
   width: 48px;
   height: 48px;

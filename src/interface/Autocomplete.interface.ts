@@ -1,6 +1,7 @@
+import { AutocompleteType, IndexType } from "../types";
+
 export interface IAutocompleteProps {
-  label: string;
-  placeholder: string;
-  planets: Planet[];
-  name: string;
+  index: IndexType;
+  type: AutocompleteType;
+  data: Planet[] | Vehicle[];
 }

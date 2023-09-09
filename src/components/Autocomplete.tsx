@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { IAutocompleteProps } from "../interface/Autocomplete.interface";
 import { IoChevronDownOutline } from "react-icons/io5";
 import { useFalconForm } from "../hooks/useFalconForm";
@@ -9,9 +9,11 @@ const Autocomplete = ({ index, type, data }: IAutocompleteProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const { register, setValue, getValues } = useFalconForm();
+  const [currentIndex, setCurrentIndex] = useState(-1);
 
   const suggestionsOpenRef = useRef<boolean>(showSuggestions);
   suggestionsOpenRef.current = showSuggestions;
+
   useEffect(() => {
     if (listRef.current) {
       const bottomDistance = listRef.current.getBoundingClientRect().bottom;
@@ -103,6 +105,38 @@ const Autocomplete = ({ index, type, data }: IAutocompleteProps) => {
     setShowSuggestions(false);
   };
 
+  const onKeydown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    event.stopPropagation();
+    const { key } = event;
+    if (key === "ArrowUp") {
+      setCurrentIndex((currentIndex) => {
+        if (currentIndex === -1) return currentIndex;
+        return currentIndex - 1;
+      });
+    } else if (key === "ArrowDown") {
+      setCurrentIndex((currentIndex) => {
+        if (currentIndex == suggestions.length - 1) return currentIndex;
+        else return currentIndex + 1;
+      });
+    } else if (key === "Enter") {
+      if (
+        currentIndex > -1 &&
+        currentIndex < suggestions.length &&
+        listRef.current
+      ) {
+        const currentElement = listRef.current.children[
+          currentIndex
+        ] as HTMLLIElement;
+        setValue(
+          type === "planet" ? `destination_${index}` : `vehicle_${index}`,
+          currentElement.innerText
+        );
+        setShowSuggestions(false);
+        (event.target as HTMLInputElement).blur();
+      }
+    }
+  };
+
   return (
     data && (
       <div className="flex flex-col gap-3 w-full border-red-500 relative">
@@ -122,6 +156,7 @@ const Autocomplete = ({ index, type, data }: IAutocompleteProps) => {
               }
             )}
             onFocus={onInputFocus}
+            onKeyDown={onKeydown}
             placeholder={
               type === "planet" ? `Enter planet no ${index}` : "Choose Vehicle"
             }
@@ -145,10 +180,13 @@ const Autocomplete = ({ index, type, data }: IAutocompleteProps) => {
             ref={listRef}
             className="bg-zinc-300 absolute w-full top-[70px] sm:top-[85px] overflow-auto lg:top-[90px] z-10 text-slate-800 rounded-sm ring-1 ring-slate-700"
           >
-            {suggestions?.map((suggestion) => (
+            {suggestions?.map((suggestion, idx) => (
               <li
+                id=""
                 key={crypto.randomUUID()}
-                className="p-2 md:p-4 text-sm md:text-base hover:bg-slate-600 rounded-sm hover:text-gray-300 transition ease-in-out duration-150"
+                className={`p-2 md:p-4 text-sm md:text-base hover:bg-slate-600 rounded-sm hover:text-gray-300 transition ease-in-out duration-150${
+                  currentIndex === idx ? " bg-slate-600 text-gray-300" : ""
+                }`}
                 onClick={suggestionOnClick}
               >
                 {suggestion.name}

@@ -36,7 +36,7 @@ const Playground = () => {
   }
 
   return (
-    <div className="text-white my-10 p-8">
+    <div className="text-white my-10 lg:p-8">
       <form ref={formRef}>
         <FormProvider {...methods}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
